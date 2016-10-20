@@ -12,7 +12,7 @@ react-native run-ios
 
 # 图片展示
 
-<img src="./image/douban1.jpeg" width="110" height="180"/>
-<img src="./image/douban2.jpeg" width="110" height="180"/>
-<img src="./image/douban3.jpeg" width="110" height="180"/>
-<img src="./image/douban4.jpeg" width="110" height="180"/>
+<img src="./image/douban1.jpeg" width="150" height="260"/><br/>
+<img src="./image/douban2.jpeg" width="150" height="260"/><br/>
+<img src="./image/douban3.jpeg" width="150" height="260"/><br/>
+<img src="./image/douban4.jpeg" width="150" height="260"/><br/>
