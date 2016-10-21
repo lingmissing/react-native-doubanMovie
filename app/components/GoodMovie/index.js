@@ -9,6 +9,7 @@ import {
   RefreshControl
 } from 'react-native'
 import StarRating from 'react-native-star-rating'
+import { Fetch } from '../../config'
 
 const styles = StyleSheet.create({
   movieItemBox: {
@@ -86,17 +87,12 @@ class GoodMovie extends Component {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
     const { type } = this.props
 
-    fetch(`https://api.douban.com/v2/movie/${type}`)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          movieList: ds.cloneWithRows(responseJson.subjects),
+    Fetch(type).then(data => {
+      this.setState({
+          movieList: ds.cloneWithRows(data.subjects),
           loaded: true
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+        })
+    })
   }
   goDetail(type,title) {
     const props = this.props
@@ -121,7 +117,7 @@ class GoodMovie extends Component {
                   <View style={styles.movieItemDetail}>
                     <Text style={styles.movieItemTitle}>{rowData.title}</Text>
                     <View style={styles.averageBox} key={rowData.title}>
-                      <StarRating 
+                      <StarRating
                         starColor='#f7bd4e'
                         maxStars={5}
                         starSize={10}
@@ -136,7 +132,7 @@ class GoodMovie extends Component {
               </View>
              </TouchableHighlight>
            </View>
-          
+
   }
   render() {
     return (

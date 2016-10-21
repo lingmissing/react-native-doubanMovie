@@ -9,6 +9,7 @@ import {
   RefreshControl
 } from 'react-native'
 import StarRating from 'react-native-star-rating'
+import { Fetch } from '../../config'
 
 const styles = StyleSheet.create({
   movieItem: {
@@ -58,34 +59,33 @@ class MovieList extends Component {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
     this.state = {
       isRefreshing: false,
-      movieList: ds.cloneWithRows([])
+      movieList: ds.cloneWithRows([]),
+      loaded: false
     }
   }
    _onRefresh() {
-     console.log('fresh');
     this.setState({
       isRefreshing: true
     })
-    setTimeout(() => {
+    const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
+    const { type } = this.props
+    Fetch(type).then(responseJson => {
       this.setState({
-        isRefreshing: false,
+        movieList: ds.cloneWithRows(responseJson.subjects),
+        loaded: true,
+        isRefreshing: false
       });
-    }, 3000);
+    })
   }
   componentWillMount() {
     const ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2})
     const { type } = this.props
-    fetch(`https://api.douban.com/v2/movie/${type}`)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          movieList: ds.cloneWithRows(responseJson.subjects)
-        });
-        console.log(responseJson.subjects);
-      })
-      .catch((error) => {
-        console.error(error);
+    Fetch(type).then(responseJson => {
+      this.setState({
+        movieList: ds.cloneWithRows(responseJson.subjects),
+        loaded: true
       });
+    })
   }
   goDetail(type,title) {
     const props = this.props
@@ -116,7 +116,6 @@ class MovieList extends Component {
     if(this.props.type !== 'in_theaters') {
       numberShow =  <Text style={styles.movieItemText}>{rowData.collect_count}人想看</Text>
     }
-    console.log(numberShow);
     return <TouchableHighlight onPress={() => this.goDetail(rowData.id,rowData.title)}>
             <View style={styles.movieItem} key={rowData.title}>
                 <Image source={{uri: rowData.images.medium}} style={styles.movieItemImg} />

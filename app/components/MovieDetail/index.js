@@ -8,6 +8,7 @@ import {
   ScrollView
 } from 'react-native'
 import StarRating from 'react-native-star-rating'
+import { Fetch } from '../../config'
 
 const styles = StyleSheet.create({
   detailBox: {
@@ -77,9 +78,10 @@ const styles = StyleSheet.create({
   },
   loading: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     alignItems: 'center',
-    textAlign: 'center'
+    textAlign: 'center',
+    color: '#ccc'
   }
 })
 
@@ -94,18 +96,12 @@ class MovieDetail extends Component {
   
   componentWillMount() {
     const { type } = this.props
-    fetch(`https://api.douban.com/v2/movie/subject/${type}`)
-      .then((response) => response.json())
-      .then((responseJson) => {
-        console.log(responseJson);
-        this.setState({
+    Fetch(type).then(responseJson => {
+      this.setState({
           loaded: true,
           movieDetail: responseJson
         });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    })
   }
   render() {
     const movieDetail = this.state.movieDetail

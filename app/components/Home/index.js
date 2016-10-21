@@ -9,6 +9,7 @@ import {
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Ionicons'
 import StarRating from 'react-native-star-rating'
+import { Fetch } from '../../config'
 
 const styles = StyleSheet.create({
   contentWrapper: {
@@ -88,6 +89,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     textAlign: 'center',
+  },
+  loading: {
+    lineHeight: 160,
+    textAlign: 'center',
+    color: '#ccc'
   }
 })
 
@@ -96,6 +102,8 @@ class Home extends Component {
     super(props);
     this.state = {
       nowMovie: [],
+      nowMovieLoaded: false,
+      willMovieLoaded: false,
       willMovie: [],
       loading: true
     }
@@ -114,26 +122,20 @@ class Home extends Component {
   }
   
   componentWillMount() {
-    fetch('https://api.douban.com/v2/movie/in_theaters')
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          nowMovie: responseJson.subjects
+    Fetch('in_theaters').then(responseJson => {
+      this.setState({
+          nowMovie: responseJson.subjects,
+          nowMovieLoaded: true
+        })
+    })
+
+    Fetch('coming_soon').then(responseJson => {
+       this.setState({
+          willMovie: responseJson.subjects,
+          willMovieLoaded: true
         });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
-    fetch('https://api.douban.com/v2/movie/coming_soon')
-      .then((response) => response.json())
-      .then((responseJson) => {
-        this.setState({
-          willMovie: responseJson.subjects
-        });
-      })
-      .catch((error) => {
-        console.error(error);
-      });
+    })
+
   }
   
   goNext(component,type,title) {
@@ -156,31 +158,35 @@ class Home extends Component {
                 <Text style={styles.movieTitleBtnText}>更多 <Icon name="ios-arrow-forward" size={15}/> </Text>
               </TouchableHighlight>
             </View>
-            <ScrollView style={styles.movieContent} horizontal={true}>
-                {this.state.nowMovie.map((item,index) => {
-                  if(index < 9) {
-                    const average = item.rating.average / 2
-                    return <TouchableHighlight key={item.title} style={styles.movieItem}
-                    onPress={() => this.goNext('MovieDetailApp',item.id,item.title)}>
-                              <View>
-                                <Image source={{uri: item.images.medium}} style={{width: 100, height: 120}} />
-                                <Text style={styles.movieItemTitle}>{item.title}</Text>
-                                <View style={styles.movieAverage}>
-                                  <StarRating 
-                                    starColor='#f7bd4e'
-                                    maxStars={5}
-                                    starSize={10}
-                                    rating={average}
-                                    selectedStar={() => false}
-                                    style={styles.starRating}
-                                  />
-                                  <Text style={styles.movieAverageText}>{item.rating.average}</Text>
+            {this.state.nowMovieLoaded ? (
+              <ScrollView style={styles.movieContent} horizontal={true}>
+                  {this.state.nowMovie.map((item,index) => {
+                    if(index < 9) {
+                      const average = item.rating.average / 2
+                      return <TouchableHighlight key={item.title} style={styles.movieItem}
+                      onPress={() => this.goNext('MovieDetailApp',item.id,item.title)}>
+                                <View>
+                                  <Image source={{uri: item.images.small}} style={{width: 100, height: 120}} />
+                                  <Text style={styles.movieItemTitle}>{item.title}</Text>
+                                  <View style={styles.movieAverage}>
+                                    <StarRating 
+                                      starColor='#f7bd4e'
+                                      maxStars={5}
+                                      starSize={10}
+                                      rating={average}
+                                      selectedStar={() => false}
+                                      style={styles.starRating}
+                                    />
+                                    <Text style={styles.movieAverageText}>{item.rating.average}</Text>
+                                  </View>
                                 </View>
-                               </View>
-                            </TouchableHighlight>
-                  }
-                })}
-            </ScrollView>
+                              </TouchableHighlight>
+                    }
+                  })}
+              </ScrollView>
+            ) : (
+              <Text style={styles.loading}>loading...</Text>
+            )}
           </View>
           <View style={styles.movieBox}>
             <View style={styles.movieTitle}>
@@ -189,21 +195,25 @@ class Home extends Component {
                 <Text style={styles.movieTitleBtnText}>更多 <Icon name="ios-arrow-forward" size={15}/> </Text>
               </TouchableHighlight>
             </View>
-            <ScrollView style={styles.movieContent} horizontal={true}>
-                {this.state.willMovie.map((item,index) => {
-                  if(index < 9) {
-                    const average = item.rating.average / 2
-                    return <TouchableHighlight key={item.title} style={styles.movieItem}
-                    onPress={() => this.goNext('MovieDetailApp',item.id,item.title)}>
-                              <View>
-                                <Image source={{uri: item.images.medium}} style={{width: 100, height: 120}} />
-                                <Text style={styles.movieItemTitle}>{item.title}</Text>
-                                <Text style={styles.personLook}>{item.collect_count}人想看</Text>
-                              </View>
-                            </TouchableHighlight>
-                  }
-                })}
-            </ScrollView>
+            { this.state.willMovieLoaded ? (
+              <ScrollView style={styles.movieContent} horizontal={true}>
+                  {this.state.willMovie.map((item,index) => {
+                    if(index < 9) {
+                      const average = item.rating.average / 2
+                      return <TouchableHighlight key={item.title} style={styles.movieItem}
+                      onPress={() => this.goNext('MovieDetailApp',item.id,item.title)}>
+                                <View>
+                                  <Image source={{uri: item.images.small}} style={{width: 100, height: 120}} />
+                                  <Text style={styles.movieItemTitle}>{item.title}</Text>
+                                  <Text style={styles.personLook}>{item.collect_count}人想看</Text>
+                                </View>
+                              </TouchableHighlight>
+                    }
+                  })}
+              </ScrollView>
+            ) : (
+              <Text style={styles.loading}>loading...</Text>
+            ) }
           </View>
           <View style={styles.movieBox}>
             <View style={styles.movieTitle}>
